@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise AI Assistant</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    <span>AI Assistant</span>
+                </div>
+                <button class="btn-icon" id="themeToggle" title="切换主题" aria-label="切换主题">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                </button>
+            </div>
+
+            <button class="btn-new-chat" id="newChatBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建对话
+            </button>
+
+            <div class="session-list" id="sessionList"></div>
+
+            <div class="sidebar-footer">
+                <button class="btn-kb" id="kbBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                    </svg>
+                    知识库管理
+                </button>
+                <button class="btn-upload" id="uploadBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    上传文档
+                </button>
+                <input type="file" id="fileInput" accept=".pdf,.txt,.md" hidden>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main-content">
+            <!-- Mobile sidebar toggle -->
+            <button class="btn-icon sidebar-toggle" id="sidebarToggle" aria-label="切换侧边栏">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+
+            <!-- Messages area -->
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h1>Enterprise AI Assistant</h1>
+                    <p>基于 RAG 的企业级智能对话助手，支持知识库检索增强</p>
+                    <div class="welcome-tips">
+                        <div class="tip-card">
+                            <span class="tip-icon">💬</span>
+                            <span>多轮对话</span>
+                        </div>
+                        <div class="tip-card">
+                            <span class="tip-icon">📚</span>
+                            <span>知识库检索</span>
+                        </div>
+                        <div class="tip-card">
+                            <span class="tip-icon">⚡</span>
+                            <span>流式输出</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload notification -->
+            <div class="upload-notification" id="uploadNotification" hidden>
+                <span id="uploadMessage"></span>
+                <button class="btn-close" id="closeNotification" aria-label="关闭通知">&times;</button>
+            </div>
+
+            <!-- Input area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <textarea
+                        id="messageInput"
+                        placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"
+                        rows="1"
+                        aria-label="消息输入框"
+                    ></textarea>
+                    <button class="btn-send" id="sendBtn" disabled aria-label="发送消息">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Knowledge Base Panel -->
+    <div class="kb-overlay" id="kbOverlay" hidden>
+        <div class="kb-panel">
+            <div class="kb-header">
+                <h2>📚 知识库管理</h2>
+                <button class="btn-close" id="kbClose" aria-label="关闭">&times;</button>
+            </div>
+            <div class="kb-stats" id="kbStats">
+                <div class="stat-card">
+                    <span class="stat-value" id="statDocs">0</span>
+                    <span class="stat-label">文档数</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="statChunks">0</span>
+                    <span class="stat-label">分块数</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="statDim">0</span>
+                    <span class="stat-label">向量维度</span>
+                </div>
+            </div>
+            <div class="kb-doc-list" id="kbDocList">
+                <div class="kb-empty">暂无文档，请上传文件到知识库</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
